@@ -1,0 +1,72 @@
+{
+  "_comment": "Pragovi iz PUNOG merenja na park_joy_420_720p50.y4m (subsample=1), preset veryfast / SVT-AV1 p10. Margina: 3 poena ispod izmerenog proseka, 6 ispod p1.",
+  "_comment_subsample": "Ne izvodi pragove iz merenja sa --subsample koji je umnozak mini-GOP-a (x264: 4, x265: 5) — rezultat je sistematski previsok.",
+  "_comment_av1": "AV1 ide na cist VBR bez maxrate, pa mu je tolerancija bitrate-a sira.",
+  "default": {
+    "vmaf_mean": 75.0,
+    "vmaf_p1": 60.0,
+    "bitrate_error_pct": 25.0
+  },
+  "variants": {
+    "h264_src_2000k_pveryfast": {
+      "vmaf_mean": 43.2,
+      "vmaf_p1": 24.8,
+      "bitrate_error_pct": 5.0
+    },
+    "h264_src_4000k_pveryfast": {
+      "vmaf_mean": 60.9,
+      "vmaf_p1": 44.1,
+      "bitrate_error_pct": 5.0
+    },
+    "h264_src_8000k_pveryfast": {
+      "vmaf_mean": 76.3,
+      "vmaf_p1": 63.5,
+      "bitrate_error_pct": 5.0
+    },
+    "h264_src_16000k_pveryfast": {
+      "vmaf_mean": 87.8,
+      "vmaf_p1": 71.0,
+      "bitrate_error_pct": 5.0
+    },
+    "hevc_src_2000k_pveryfast": {
+      "vmaf_mean": 50.0,
+      "vmaf_p1": 37.5,
+      "bitrate_error_pct": 5.0
+    },
+    "hevc_src_4000k_pveryfast": {
+      "vmaf_mean": 65.3,
+      "vmaf_p1": 52.7,
+      "bitrate_error_pct": 5.0
+    },
+    "hevc_src_8000k_pveryfast": {
+      "vmaf_mean": 79.0,
+      "vmaf_p1": 66.4,
+      "bitrate_error_pct": 5.0
+    },
+    "hevc_src_16000k_pveryfast": {
+      "vmaf_mean": 89.6,
+      "vmaf_p1": 79.6,
+      "bitrate_error_pct": 5.0
+    },
+    "av1_src_2000k_p10": {
+      "vmaf_mean": 54.5,
+      "vmaf_p1": 32.2,
+      "bitrate_error_pct": 15.0
+    },
+    "av1_src_4000k_p10": {
+      "vmaf_mean": 70.6,
+      "vmaf_p1": 54.9,
+      "bitrate_error_pct": 15.0
+    },
+    "av1_src_8000k_p10": {
+      "vmaf_mean": 80.6,
+      "vmaf_p1": 65.0,
+      "bitrate_error_pct": 15.0
+    },
+    "av1_src_16000k_p10": {
+      "vmaf_mean": 89.1,
+      "vmaf_p1": 76.7,
+      "bitrate_error_pct": 15.0
+    }
+  }
+}

@@ -1,0 +1,8 @@
+out/
+clips/*.mp4
+clips/*.y4m
+__pycache__/
+*.egg-info/
+.venv/
+.pytest_cache/
+venv/

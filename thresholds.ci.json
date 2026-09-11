@@ -1,0 +1,37 @@
+{
+  "_comment": "Pragovi za CI smoke test na GENERISANOM klipu (testsrc2, 2s, 640x360). Sluze za detekciju regresije, ne za ocenu kodeka — sinteticki materijal je znatno laksi od pravog i daje nerealno visok VMAF. Prava merenja idu u thresholds.json.",
+  "_comment_margin": "Margina je 2 poena ispod izmerenog; klip je fiksan i enkodovanje determinsticko, pa siroka margina nije potrebna.",
+  "_comment_av1": "AV1 ide na cist VBR bez maxrate i na klipu od 2s promasuje ciljni bitrate za oko 40%. Tolerancija je zato siroka; na duzem materijalu se rate control stabilizuje.",
+  "default": {
+    "vmaf_mean": 85.0,
+    "vmaf_p1": 80.0,
+    "bitrate_error_pct": 20.0
+  },
+  "variants": {
+    "h264_src_300k_pveryfast": {
+      "vmaf_mean": 88.5,
+      "vmaf_p1": 85.0,
+      "bitrate_error_pct": 20.0
+    },
+    "h264_src_1500k_pveryfast": {
+      "vmaf_mean": 96.9,
+      "vmaf_p1": 96.3,
+      "bitrate_error_pct": 20.0
+    },
+    "hevc_src_300k_pveryfast": {
+      "vmaf_mean": 88.1,
+      "vmaf_p1": 85.0,
+      "bitrate_error_pct": 10.0
+    },
+    "hevc_src_1500k_pveryfast": {
+      "vmaf_mean": 96.7,
+      "vmaf_p1": 96.1,
+      "bitrate_error_pct": 10.0
+    },
+    "av1_src_1500k_p10": {
+      "vmaf_mean": 96.8,
+      "vmaf_p1": 95.1,
+      "bitrate_error_pct": 50.0
+    }
+  }
+}

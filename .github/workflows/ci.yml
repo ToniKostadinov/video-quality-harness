@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      # ffmpeg iz apt-a nema filter libvmaf, pa uzimamo staticki build.
+      # Kesiramo ga: preuzimanje je ~120 MB i traje duze od samih testova.
+      - name: Kesiraj ffmpeg
+        id: ffmpeg-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin
+          key: ffmpeg-static-libvmaf-v1
+
+      - name: Preuzmi ffmpeg sa libvmaf
+        if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/.local/bin
+          cd /tmp
+          curl -fsSL -o ffmpeg.tar.xz \
+            https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz
+          tar xf ffmpeg.tar.xz
+          cp ffmpeg-master-latest-linux64-gpl/bin/ffmpeg \
+             ffmpeg-master-latest-linux64-gpl/bin/ffprobe ~/.local/bin/
+
+      - name: Proveri okruzenje
+        run: |
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          export PATH="$HOME/.local/bin:$PATH"
+          ffmpeg -hide_banner -version | head -1
+          # Rana i jasna greska ako build nema libvmaf — inace bi se testovi
+          # tiho preskocili i CI bi bio zelen bez ijedne provere kvaliteta.
+          ffmpeg -hide_banner -filters | grep -q ' libvmaf ' \
+            || { echo "ffmpeg build nema filter libvmaf"; exit 1; }
+
+      - name: Instaliraj paket
+        run: pip install -e ".[dev]"
+
+      - name: Testovi
+        run: pytest -v
+
+      # Izvestaj se pravi na generisanom klipu — brzo i bez binarnih fajlova u
+      # repou. Za prava merenja se koristi pravi materijal lokalno.
+      - name: Izvestaj
+        if: always()
+        run: |
+          python - <<'EOF'
+          from pathlib import Path
+          from vqh import ffmpeg
+          ffmpeg.make_test_clip(Path("clips/ci.mp4"), seconds=3,
+                                size="640x360", fps=30)
+          EOF
+          python -m vqh.encode clips/ci.mp4 --codecs h264 hevc av1 \
+            --bitrates 300 1500 --deterministic --out out/
+          python -m vqh.quality clips/ci.mp4 --manifest out/manifest.json \
+            --threads 2
+          python -m vqh.report --quality out/quality.json \
+            --thresholds thresholds.ci.json --out out/report.html \
+            --source clips/ci.mp4
+
+      - name: Okaci izvestaj
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: izvestaj-kvaliteta
+          path: |
+            out/report.html
+            out/quality.json
+            out/manifest.json
+          retention-days: 14
