@@ -1,6 +1,6 @@
 # video-quality-harness
 
-[![CI](https://github.com/KORISNIK/video-quality-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/KORISNIK/video-quality-harness/actions/workflows/ci.yml)
+[![CI](https://github.com/ToniKostadinov/video-quality-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/ToniKostadinov/video-quality-harness/actions/workflows/ci.yml)
 
 Automatizovani regresioni testovi kvaliteta video enkodiranja. Enkoduje referentni
 klip u matricu varijanti (kodek × bitrate × preset × rezolucija), meri rezultat i
