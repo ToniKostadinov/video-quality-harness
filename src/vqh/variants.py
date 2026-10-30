@@ -6,12 +6,17 @@ VMAF pragove, oni ce se vezivati za ime varijante (`Variant.name`).
 
 from __future__ import annotations
 
+import functools
+import shutil
+import subprocess
 import itertools
 from dataclasses import dataclass, field
 
 # Mapiranje logickog imena kodeka -> ffmpeg enkoder + specificni flagovi.
 # Zamena softverskog enkodera hardverskim (h264_vaapi, hevc_nvenc, av1_qsv)
 # se radi ovde i nigde drugde.
+# NVIDIA NVENC (hardverski). Preseti p1 (najbrzi) .. p7 (najsporiji/najbolji).
+# VBR + maxrate daje istu "ogranicenu" tacku na krivoj kao x264/x265.
 CODECS: dict[str, dict] = {
     "h264": {
         "encoder": "libx264",
@@ -38,7 +43,42 @@ CODECS: dict[str, dict] = {
         "maxrate_factor": None,
         "deterministic": ["-svtav1-params", "lp=1"],
     },
+     "h264_nvenc": {
+        "encoder": "h264_nvenc",
+        "presets": ["p4", "p1", "p7"],
+        "extra": ["-pix_fmt", "yuv420p", "-rc", "vbr", "-tune", "hq"],
+        "maxrate_factor": 1.0,
+        "deterministic": None,  # NVENC nema niti koje bi se obarale
+    },
+    "hevc_nvenc": {
+        "encoder": "hevc_nvenc",
+        "presets": ["p4", "p1", "p7"],
+        "extra": ["-pix_fmt", "yuv420p", "-rc", "vbr", "-tune", "hq", "-tag:v", "hvc1"],
+        "maxrate_factor": 1.0,
+        "deterministic": None,
+    },
 }
+
+@functools.lru_cache(maxsize=None)
+def encoder_available(codec: str) -> bool:
+    """True ako enkoder STVARNO radi na ovoj masini, ne samo da je kompajliran.
+
+    Primer: av1_nvenc postoji u Gyan buildu, ali RTX 30xx nema AV1 enkoder
+    u hardveru — `ffmpeg -encoders` ga prijavljuje, a enkodiranje puca.
+    """
+    spec = CODECS.get(codec)
+    if spec is None or shutil.which("ffmpeg") is None:
+        return False
+    cmd = [
+        "ffmpeg", "-hide_banner", "-loglevel", "error",
+        "-f", "lavfi", "-i", "color=c=black:size=256x256:rate=30:duration=0.2",
+        "-c:v", spec["encoder"], "-f", "null", "-",
+    ]
+    try:
+        proc = subprocess.run(cmd, capture_output=True, timeout=30)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return proc.returncode == 0
 
 
 @dataclass(frozen=True)

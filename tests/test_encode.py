@@ -3,9 +3,24 @@
 Pravi testovi kvaliteta (VMAF pragovi) dolaze u sledecem koraku.
 """
 
+
+
+
 from __future__ import annotations
 
 import pytest
+
+
+from vqh.variants import encoder_available
+
+def _hw(codec: str, preset: str):
+    return pytest.param(
+        codec, preset,
+        marks=pytest.mark.skipif(not encoder_available(codec),
+                                 reason=f"{codec} nije dostupan na ovoj masini"),
+    )
+
+
 
 from vqh import ffmpeg
 from vqh.encode import encode_one
@@ -38,7 +53,12 @@ def test_matrix_expands_to_expected_count():
     }
 
 
-@pytest.mark.parametrize("codec,preset", [("h264", "veryfast"), ("hevc", "veryfast")])
+@pytest.mark.parametrize("codec,preset", [
+    ("h264", "veryfast"),
+    ("hevc", "veryfast"),
+    _hw("h264_nvenc", "p4"),
+    _hw("hevc_nvenc", "p4"),
+])
 def test_encode_produces_playable_output(reference_clip, tmp_path, codec, preset):
     variant = Variant(codec=codec, bitrate_kbps=800, preset=preset)
     result = encode_one(reference_clip, variant, tmp_path)
